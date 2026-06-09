@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Butterfly Sides — A Quilted Slidedeck</title>
+<style>
+  /* ----------  Quilt-inspired palette  ---------- */
+  :root {
+    --thread:   #3a2c23;          /* dark stitching brown          */
+    --calico:   #f4ecd8;          /* warm muslin background        */
+    --patch-a:  #d8754f;          /* terracotta patch              */
+    --patch-b:  #4a7a8c;          /* dusty teal patch              */
+    --patch-c:  #c9a23f;          /* goldenrod patch               */
+    --patch-d:  #8a6a9c;          /* heather patch                 */
+    --cream:    #fffaf0;
+    --stitch:   2px dashed #fff8ec;
+    --radius:   14px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: "Georgia", "Iowan Old Style", serif;
+    color: var(--thread);
+    /* a patchwork checker laid under everything */
+    background-color: var(--calico);
+    background-image:
+      linear-gradient(45deg, rgba(216,117,79,.12) 25%, transparent 25%, transparent 75%, rgba(216,117,79,.12) 75%),
+      linear-gradient(45deg, rgba(74,122,140,.12) 25%, transparent 25%, transparent 75%, rgba(74,122,140,.12) 75%);
+    background-size: 64px 64px;
+    background-position: 0 0, 32px 32px;
+    min-height: 100vh;
+  }
+
+  header {
+    text-align: center;
+    padding: 2rem 1rem 1rem;
+  }
+  header h1 {
+    margin: 0;
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 0 var(--cream);
+  }
+  header p {
+    margin: .4rem auto 0;
+    max-width: 40ch;
+    font-style: italic;
+    opacity: .8;
+  }
+
+  /* ----------  The deck: a responsive quilt of patches  ---------- */
+  .deck {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+    gap: 1.4rem;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 1.5rem clamp(1rem, 4vw, 2.5rem) 3rem;
+  }
+
+  .slide {
+    position: relative;
+    background: var(--cream);
+    border-radius: var(--radius);
+    padding: 1rem 1rem 1.3rem;
+    /* the "patch" border — stitched onto the quilt */
+    box-shadow:
+      0 0 0 6px var(--cream),
+      0 0 0 8px var(--thread),
+      0 10px 22px rgba(58,44,35,.22);
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+  .slide:hover, .slide:focus-within {
+    transform: translateY(-6px) rotate(-.4deg);
+    box-shadow:
+      0 0 0 6px var(--cream),
+      0 0 0 8px var(--thread),
+      0 18px 30px rgba(58,44,35,.30);
+  }
+  /* alternate the patch accent colour, quilt-style */
+  .slide:nth-child(4n+1) { --accent: var(--patch-a); }
+  .slide:nth-child(4n+2) { --accent: var(--patch-b); }
+  .slide:nth-child(4n+3) { --accent: var(--patch-c); }
+  .slide:nth-child(4n)   { --accent: var(--patch-d); }
+
+  .frame {
+    border: 4px solid var(--accent);
+    border-radius: 10px;
+    padding: 5px;
+    background:
+      repeating-linear-gradient(45deg,
+        color-mix(in srgb, var(--accent) 18%, transparent) 0 8px,
+        transparent 8px 16px);
+  }
+  .frame img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 6px;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+
+  .slide h2 {
+    margin: .9rem 0 .2rem;
+    font-size: 1.3rem;
+    border-bottom: var(--stitch);
+    padding-bottom: .35rem;
+  }
+  .slide h2 .sci {
+    display: block;
+    font-size: .8rem;
+    font-style: italic;
+    font-weight: normal;
+    opacity: .65;
+  }
+  .slide p { line-height: 1.55; margin: .6rem 0 0; }
+
+  .funfact {
+    margin-top: .8rem;
+    padding: .6rem .8rem;
+    background: color-mix(in srgb, var(--accent) 14%, var(--cream));
+    border-left: 5px solid var(--accent);
+    border-radius: 6px;
+    font-size: .95rem;
+  }
+  .funfact strong { letter-spacing: .5px; }
+
+  .badge {
+    position: absolute;
+    top: -14px; left: -14px;
+    width: 38px; height: 38px;
+    display: grid; place-items: center;
+    background: var(--accent);
+    color: var(--cream);
+    font-family: sans-serif;
+    font-weight: bold;
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px var(--cream), 0 0 0 5px var(--thread);
+  }
+
+  footer {
+    text-align: center;
+    padding: 1.5rem 1rem 2.5rem;
+    font-size: .85rem;
+    opacity: .7;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .slide, .slide:hover { transition: none; transform: none; }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Butterfly Sides</h1>
+    <p>A patchwork slidedeck of winged wanderers — stitched together one square at a time.</p>
+  </header>
+
+  <main class="deck">
+
+    <!-- Slide 1 -->
+    <article class="slide" tabindex="0">
+      <span class="badge" aria-hidden="true">1</span>
+      <div class="frame">
+        <img src="Schmetterling1jpg.jpg"
+             alt="A monarch butterfly with wings spread wide, showing deep orange panels webbed with thick black veins and bordered by two rows of white dots, perched on a small yellow flower above blurred green grass." />
+      </div>
+      <h2>The Monarch
+        <span class="sci">Danaus plexippus</span>
+      </h2>
+      <p>Wings flung open like a pair of stained-glass windows, this monarch shows off the orange-and-black warning colours that tell hungry birds, &ldquo;I taste terrible.&rdquo; That bitterness is borrowed — caterpillars stockpile toxins from the milkweed they devour and keep them for life.</p>
+      <div class="funfact">
+        <strong>Fun stitch:</strong> Monarchs run a multi-generation relay marathon, traveling up to 3,000 miles to overwinter in Mexico — yet no single butterfly ever makes the full round trip. The great-grandchildren finish the journey their ancestors began.
+      </div>
+    </article>
+
+    <!-- Slide 2 -->
+    <article class="slide" tabindex="0">
+      <span class="badge" aria-hidden="true">2</span>
+      <div class="frame">
+        <img src="Schmetterling2.jpg"
+             alt="A blue morpho butterfly resting on grey stone with wings open flat, the upper wings a brilliant metallic blue fading to black edges speckled with tiny white dots." />
+      </div>
+      <h2>The Blue Morpho
+        <span class="sci">Morpho peleides</span>
+      </h2>
+      <p>That electric blue is a beautiful lie. There is almost no blue pigment here at all — microscopic ridges on each scale bend and bounce light so only blue escapes, a trick called structural colour. Tilt the wing and the shimmer shifts like wet silk on a quilt.</p>
+      <div class="funfact">
+        <strong>Fun stitch:</strong> Snap the book shut and the morpho vanishes — the undersides of its wings are dull brown with owl-like eyespots, so a flying morpho seems to blink in and out of existence as it flaps.
+      </div>
+    </article>
+
+    <!-- Slide 3 -->
+    <article class="slide" tabindex="0">
+      <span class="badge" aria-hidden="true">3</span>
+      <div class="frame">
+        <img src="Schmetterling3.jpg"
+             alt="A black swallowtail butterfly with wings folded, its dark wings trimmed with rows of pale yellow and powder-blue spots and a single orange eyespot, sipping from clusters of fuzzy pink ironweed flowers against soft green foliage." />
+      </div>
+      <h2>The Black Swallowtail
+        <span class="sci">Papilio polyxenes</span>
+      </h2>
+      <p>Dressed in midnight velvet and beaded with gold and blue, this swallowtail uncurls its straw-like proboscis to drink from pink ironweed. The bright spots and tail-like points aren&rsquo;t just decoration — they mimic the toxic pipevine swallowtail to keep predators guessing.</p>
+      <div class="funfact">
+        <strong>Fun stitch:</strong> Its caterpillar has a hidden weapon: a forked orange gland called an osmeterium that pops out behind its head like a snake&rsquo;s tongue, releasing a sharp citrusy stink to send ants and birds packing.
+      </div>
+    </article>
+
+  </main>
+
+  <footer>
+    Pieced together for the DHSI <em>Butterfly Sides</em> collection — every patch a different flight path.
+  </footer>
+</body>
+</html>
