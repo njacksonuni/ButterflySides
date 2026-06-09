@@ -51,6 +51,24 @@
     opacity: .8;
   }
 
+  .slideshow-launch {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    margin-top: 1.1rem;
+    padding: .65rem 1.3rem;
+    font: inherit;
+    font-weight: bold;
+    color: var(--cream);
+    background: var(--patch-b);
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 0 0 3px var(--cream), 0 0 0 5px var(--thread);
+    transition: transform .2s ease, background .2s ease;
+  }
+  .slideshow-launch:hover { transform: translateY(-2px); background: var(--patch-a); }
+
   /* ----------  The deck: a responsive quilt of patches  ---------- */
   .deck {
     display: grid;
@@ -95,6 +113,16 @@
         color-mix(in srgb, var(--accent) 18%, transparent) 0 8px,
         transparent 8px 16px);
   }
+  /* the image is now a button that opens the lightbox */
+  .frame .open-pic {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: zoom-in;
+    border-radius: 6px;
+  }
   .frame img {
     display: block;
     width: 100%;
@@ -118,6 +146,30 @@
     opacity: .65;
   }
   .slide p { line-height: 1.55; margin: .6rem 0 0; }
+
+  /* ----------  Drop-down for "more information"  ---------- */
+  details.more {
+    margin-top: .8rem;
+    border-top: var(--stitch);
+    padding-top: .4rem;
+  }
+  details.more summary {
+    cursor: pointer;
+    font-weight: bold;
+    color: var(--accent);
+    list-style: none;
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .2rem 0;
+  }
+  details.more summary::-webkit-details-marker { display: none; }
+  details.more summary::before {
+    content: "▸";
+    transition: transform .2s ease;
+  }
+  details.more[open] summary::before { transform: rotate(90deg); }
+  details.more p { margin: .55rem 0 0; }
 
   .funfact {
     margin-top: .8rem;
@@ -149,8 +201,96 @@
     opacity: .7;
   }
 
+  /* ----------  Lightbox / slideshow overlay  ---------- */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: none;
+    place-items: center;
+    background: rgba(33, 24, 18, .92);
+    padding: clamp(1rem, 4vw, 3rem);
+  }
+  .lightbox.open { display: grid; }
+
+  .lb-stage {
+    position: relative;
+    max-width: min(900px, 100%);
+    width: 100%;
+    text-align: center;
+  }
+  .lb-figure {
+    margin: 0;
+    background: var(--cream);
+    border-radius: var(--radius);
+    padding: 10px 10px 0;
+    box-shadow: 0 0 0 4px var(--thread), 0 20px 50px rgba(0,0,0,.5);
+  }
+  .lb-figure img {
+    display: block;
+    width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+    border-radius: 8px;
+    background: #111;
+  }
+  .lb-caption {
+    padding: .8rem 1rem 1rem;
+    font-size: 1rem;
+  }
+  .lb-caption .sci { font-style: italic; opacity: .7; }
+  .lb-counter {
+    margin-top: .9rem;
+    color: var(--cream);
+    font-size: .9rem;
+    letter-spacing: 1px;
+  }
+
+  .lb-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px; height: 48px;
+    display: grid; place-items: center;
+    font-size: 1.6rem;
+    color: var(--thread);
+    background: var(--cream);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 0 3px var(--thread);
+  }
+  .lb-prev { left: -10px; }
+  .lb-next { right: -10px; }
+  .lb-btn:hover { background: var(--patch-c); }
+
+  .lb-controls {
+    position: absolute;
+    top: -56px; right: 0;
+    display: flex;
+    gap: .6rem;
+  }
+  .lb-controls button {
+    font: inherit;
+    font-weight: bold;
+    color: var(--cream);
+    background: transparent;
+    border: 2px solid var(--cream);
+    border-radius: 999px;
+    padding: .35rem .9rem;
+    cursor: pointer;
+  }
+  .lb-controls button:hover { background: var(--cream); color: var(--thread); }
+
+  @media (max-width: 560px) {
+    .lb-prev { left: 4px; }
+    .lb-next { right: 4px; }
+    .lb-controls { top: -50px; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .slide, .slide:hover { transition: none; transform: none; }
+    .slideshow-launch:hover { transform: none; }
   }
 </style>
 </head>
@@ -158,56 +298,141 @@
   <header>
     <h1>Butterfly Sides</h1>
     <p>A patchwork slidedeck of winged wanderers — stitched together one square at a time.</p>
+    <button type="button" class="slideshow-launch" id="startShow">▶ Start slideshow</button>
   </header>
 
-  <main class="deck">
+  <main class="deck" id="deck">
 
     <!-- Slide 1 -->
     <article class="slide" tabindex="0">
       <span class="badge" aria-hidden="true">1</span>
       <div class="frame">
-        <img src="Schmetterling1jpg.jpg"
-             alt="A monarch butterfly with wings spread wide, showing deep orange panels webbed with thick black veins and bordered by two rows of white dots, perched on a small yellow flower above blurred green grass." />
+        <button type="button" class="open-pic" data-index="0">
+          <img src="pictures/Schmetterling1jpg.jpg"
+               alt="A monarch butterfly with wings spread wide, showing deep orange panels webbed with thick black veins and bordered by two rows of white dots, perched on a small yellow flower above blurred green grass." />
+        </button>
       </div>
       <h2>The Monarch
         <span class="sci">Danaus plexippus</span>
       </h2>
-      <p>Wings flung open like a pair of stained-glass windows, this monarch shows off the orange-and-black warning colours that tell hungry birds, &ldquo;I taste terrible.&rdquo; That bitterness is borrowed — caterpillars stockpile toxins from the milkweed they devour and keep them for life.</p>
-      <div class="funfact">
-        <strong>Fun stitch:</strong> Monarchs run a multi-generation relay marathon, traveling up to 3,000 miles to overwinter in Mexico — yet no single butterfly ever makes the full round trip. The great-grandchildren finish the journey their ancestors began.
-      </div>
+      <p>Orange-and-black wings like stained glass — a warning sign that says &ldquo;I taste terrible.&rdquo;</p>
+      <details class="more">
+        <summary>More about the Monarch</summary>
+        <p>That bitterness is borrowed — caterpillars stockpile toxins from the milkweed they devour and keep them for life.</p>
+        <div class="funfact">
+          <strong>Fun stitch:</strong> Monarchs run a multi-generation relay marathon, traveling up to 3,000 miles to overwinter in Mexico — yet no single butterfly ever makes the full round trip. The great-grandchildren finish the journey their ancestors began.
+        </div>
+      </details>
     </article>
 
     <!-- Slide 2 -->
     <article class="slide" tabindex="0">
       <span class="badge" aria-hidden="true">2</span>
       <div class="frame">
-        <img src="Schmetterling2.jpg"
-             alt="A blue morpho butterfly resting on grey stone with wings open flat, the upper wings a brilliant metallic blue fading to black edges speckled with tiny white dots." />
+        <button type="button" class="open-pic" data-index="1">
+          <img src="pictures/Schmetterling2.jpg"
+               alt="A blue morpho butterfly resting on grey stone with wings open flat, the upper wings a brilliant metallic blue fading to black edges speckled with tiny white dots." />
+        </button>
       </div>
       <h2>The Blue Morpho
         <span class="sci">Morpho peleides</span>
       </h2>
-      <p>That electric blue is a beautiful lie. There is almost no blue pigment here at all — microscopic ridges on each scale bend and bounce light so only blue escapes, a trick called structural colour. Tilt the wing and the shimmer shifts like wet silk on a quilt.</p>
-      <div class="funfact">
-        <strong>Fun stitch:</strong> Snap the book shut and the morpho vanishes — the undersides of its wings are dull brown with owl-like eyespots, so a flying morpho seems to blink in and out of existence as it flaps.
-      </div>
+      <p>An electric-blue shimmer that comes from light, not pigment — a trick called structural colour.</p>
+      <details class="more">
+        <summary>More about the Blue Morpho</summary>
+        <p>There is almost no blue pigment here at all — microscopic ridges on each scale bend and bounce light so only blue escapes. Tilt the wing and the shimmer shifts like wet silk on a quilt.</p>
+        <div class="funfact">
+          <strong>Fun stitch:</strong> Snap the book shut and the morpho vanishes — the undersides of its wings are dull brown with owl-like eyespots, so a flying morpho seems to blink in and out of existence as it flaps.
+        </div>
+      </details>
     </article>
 
     <!-- Slide 3 -->
     <article class="slide" tabindex="0">
       <span class="badge" aria-hidden="true">3</span>
       <div class="frame">
-        <img src="Schmetterling3.jpg"
-             alt="A black swallowtail butterfly with wings folded, its dark wings trimmed with rows of pale yellow and powder-blue spots and a single orange eyespot, sipping from clusters of fuzzy pink ironweed flowers against soft green foliage." />
+        <button type="button" class="open-pic" data-index="2">
+          <img src="pictures/Schmetterling3.jpg"
+               alt="A black swallowtail butterfly with wings folded, its dark wings trimmed with rows of pale yellow and powder-blue spots and a single orange eyespot, sipping from clusters of fuzzy pink ironweed flowers against soft green foliage." />
+        </button>
       </div>
       <h2>The Black Swallowtail
         <span class="sci">Papilio polyxenes</span>
       </h2>
-      <p>Dressed in midnight velvet and beaded with gold and blue, this swallowtail uncurls its straw-like proboscis to drink from pink ironweed. The bright spots and tail-like points aren&rsquo;t just decoration — they mimic the toxic pipevine swallowtail to keep predators guessing.</p>
-      <div class="funfact">
-        <strong>Fun stitch:</strong> Its caterpillar has a hidden weapon: a forked orange gland called an osmeterium that pops out behind its head like a snake&rsquo;s tongue, releasing a sharp citrusy stink to send ants and birds packing.
+      <p>Midnight-velvet wings beaded with gold and blue, drinking from pink ironweed.</p>
+      <details class="more">
+        <summary>More about the Black Swallowtail</summary>
+        <p>The bright spots and tail-like points aren&rsquo;t just decoration — they mimic the toxic pipevine swallowtail to keep predators guessing.</p>
+        <div class="funfact">
+          <strong>Fun stitch:</strong> Its caterpillar has a hidden weapon: a forked orange gland called an osmeterium that pops out behind its head like a snake&rsquo;s tongue, releasing a sharp citrusy stink to send ants and birds packing.
+        </div>
+      </details>
+    </article>
+
+    <!-- Slide 4 -->
+    <article class="slide" tabindex="0">
+      <span class="badge" aria-hidden="true">4</span>
+      <div class="frame">
+        <button type="button" class="open-pic" data-index="3">
+          <img src="pictures/Schmetterling4.jpg"
+               alt="A lime swallowtail butterfly with black-and-white chequered wings edged with small red and blue eyespots, feeding with its proboscis on a cluster of orange-and-yellow lantana flowers against a soft green background." />
+        </button>
       </div>
+      <h2>The Lime Swallowtail
+        <span class="sci">Papilio demoleus</span>
+      </h2>
+      <p>A mosaic of cream and charcoal scales, dotted with red and blue, sipping from lantana.</p>
+      <details class="more">
+        <summary>More about the Lime Swallowtail</summary>
+        <p>Also known as the chequered or citrus swallowtail, it is one of the most widespread butterflies in the world — a restless traveller found from the Middle East across Asia to Australia.</p>
+        <div class="funfact">
+          <strong>Fun stitch:</strong> Its caterpillars adore citrus trees, so orchard keepers know it well. Young caterpillars disguise themselves as glistening bird droppings — an unappetising costume that keeps hungry predators away.
+        </div>
+      </details>
+    </article>
+
+    <!-- Slide 5 -->
+    <article class="slide" tabindex="0">
+      <span class="badge" aria-hidden="true">5</span>
+      <div class="frame">
+        <button type="button" class="open-pic" data-index="4">
+          <img src="pictures/Schmetterling5.jpg"
+               alt="A common blue butterfly perched on a green leaf with wings open flat, the upper surface a soft sky-blue rimmed with a thin white fringe, its slender body and clubbed antennae clearly visible." />
+        </button>
+      </div>
+      <h2>The Common Blue
+        <span class="sci">Polyommatus icarus</span>
+      </h2>
+      <p>A scrap of summer sky on a leaf — small, soft-blue wings rimmed with a fine white fringe.</p>
+      <details class="more">
+        <summary>More about the Common Blue</summary>
+        <p>Only the males wear this bright blue; females are warm brown, often dusted with blue near the body. Despite its name, it is one of Europe&rsquo;s most beloved little butterflies, fluttering low over grassland and meadows.</p>
+        <div class="funfact">
+          <strong>Fun stitch:</strong> Its caterpillars strike a sweet bargain with ants — they ooze a sugary fluid the ants drink, and in return the ants stand guard against wasps and other predators.
+        </div>
+      </details>
+    </article>
+
+    <!-- Slide 6 -->
+    <article class="slide" tabindex="0">
+      <span class="badge" aria-hidden="true">6</span>
+      <div class="frame">
+        <button type="button" class="open-pic" data-index="5">
+          <img src="pictures/Schmetterling6.jpg"
+               alt="A great eggfly butterfly resting on a person's hand with wings open, its velvety black wings marked by large white spots haloed in iridescent blue-purple." />
+        </button>
+      </div>
+      <h2>The Great Eggfly
+        <span class="sci">Hypolimnas bolina</span>
+      </h2>
+      <p>Velvet-black wings stamped with white spots that glow electric blue-purple in the light.</p>
+      <details class="more">
+        <summary>More about the Great Eggfly</summary>
+        <p>Also called the blue moon butterfly, the male flashes those shimmering haloes to defend his patch of territory. Females are master mimics, copying the look of poisonous species to borrow their protection.</p>
+        <div class="funfact">
+          <strong>Fun stitch:</strong> Great eggfly mothers are unusually devoted — a female will stand guard over her cluster of eggs for days, one of the few butterflies known to protect her young after laying them.
+        </div>
+      </details>
     </article>
 
   </main>
@@ -215,5 +440,118 @@
   <footer>
     Pieced together for the DHSI <em>Butterfly Sides</em> collection — every patch a different flight path.
   </footer>
+
+  <!-- ----------  Lightbox / slideshow  ---------- -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Butterfly viewer">
+    <div class="lb-stage">
+      <div class="lb-controls">
+        <button type="button" id="lbPlay" aria-label="Play or pause slideshow">▶ Play</button>
+        <button type="button" id="lbClose" aria-label="Close viewer">✕ Close</button>
+      </div>
+      <button type="button" class="lb-btn lb-prev" id="lbPrev" aria-label="Previous butterfly">‹</button>
+      <figure class="lb-figure">
+        <img id="lbImg" src="" alt="" />
+        <figcaption class="lb-caption" id="lbCaption"></figcaption>
+      </figure>
+      <button type="button" class="lb-btn lb-next" id="lbNext" aria-label="Next butterfly">›</button>
+      <div class="lb-counter" id="lbCounter"></div>
+    </div>
+  </div>
+
+<script>
+  (function () {
+    // Build the gallery straight from the slides, so it always stays in sync.
+    var pics = Array.prototype.map.call(
+      document.querySelectorAll('.deck .open-pic'),
+      function (btn) {
+        var img = btn.querySelector('img');
+        var article = btn.closest('.slide');
+        var h2 = article.querySelector('h2');
+        var name = h2.childNodes[0].textContent.trim();
+        var sci = (h2.querySelector('.sci') || {}).textContent || '';
+        return { src: img.getAttribute('src'), alt: img.getAttribute('alt'), name: name, sci: sci.trim() };
+      }
+    );
+
+    var lightbox = document.getElementById('lightbox');
+    var lbImg     = document.getElementById('lbImg');
+    var lbCaption = document.getElementById('lbCaption');
+    var lbCounter = document.getElementById('lbCounter');
+    var lbPlay    = document.getElementById('lbPlay');
+    var current = 0;
+    var timer = null;
+
+    function render() {
+      var p = pics[current];
+      lbImg.src = p.src;
+      lbImg.alt = p.alt;
+      lbCaption.innerHTML = '<strong>' + p.name + '</strong>' +
+        (p.sci ? ' <span class="sci">' + p.sci + '</span>' : '');
+      lbCounter.textContent = (current + 1) + ' / ' + pics.length;
+    }
+
+    function open(i) {
+      current = i;
+      render();
+      lightbox.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function close() {
+      stopShow();
+      lightbox.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function go(step) {
+      current = (current + step + pics.length) % pics.length;
+      render();
+    }
+
+    function startShow() {
+      if (timer) return;
+      lbPlay.textContent = '❚❚ Pause';
+      timer = setInterval(function () { go(1); }, 3000);
+    }
+    function stopShow() {
+      if (!timer) return;
+      clearInterval(timer);
+      timer = null;
+      lbPlay.textContent = '▶ Play';
+    }
+    function toggleShow() { timer ? stopShow() : startShow(); }
+
+    // Open from any slide image
+    document.querySelectorAll('.deck .open-pic').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        open(parseInt(btn.getAttribute('data-index'), 10));
+      });
+    });
+
+    // Header button: open at the first slide and auto-play
+    document.getElementById('startShow').addEventListener('click', function () {
+      open(0);
+      startShow();
+    });
+
+    document.getElementById('lbClose').addEventListener('click', close);
+    document.getElementById('lbPrev').addEventListener('click', function () { stopShow(); go(-1); });
+    document.getElementById('lbNext').addEventListener('click', function () { stopShow(); go(1); });
+    lbPlay.addEventListener('click', toggleShow);
+
+    // Click the dark backdrop to close
+    lightbox.addEventListener('click', function (e) {
+      if (e.target === lightbox) close();
+    });
+
+    // Keyboard: arrows navigate, Esc closes
+    document.addEventListener('keydown', function (e) {
+      if (!lightbox.classList.contains('open')) return;
+      if (e.key === 'ArrowRight') { stopShow(); go(1); }
+      else if (e.key === 'ArrowLeft') { stopShow(); go(-1); }
+      else if (e.key === 'Escape') close();
+    });
+  })();
+</script>
 </body>
 </html>
